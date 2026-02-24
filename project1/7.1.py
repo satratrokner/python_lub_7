@@ -1,30 +1,44 @@
 import requests
+import os
 
-API_KEY = "fbeca65cf99cc7dfbb7889bd40af93bd"
+API_KEY = os.environ.get('OPENWEATHER_API_KEY')
+
+if not API_KEY:
+    print("Ошибка: API ключ не найден в переменных окружения")
+    print("Убедитесь, что переменная OPENWEATHER_API_KEY установлена правильно")
+    exit()
 
 city = input("Введите название города: ")
 url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric&lang=ru"
 
-response = requests.get(url)
-data = response.json()
+try:
 
-if response.status_code != 200:
-    print("Ошибка:", data.get("message"))
-    exit()
+    response = requests.get(url)
+    data = response.json()
 
-temperature = data["main"]["temp"]
-feels_like = data["main"]["feels_like"]
-humidity = data["main"]["humidity"]
-pressure = data["main"]["pressure"]
-weather_description = data["weather"][0]["description"]
-wind_speed = data["wind"]["speed"]
-city_name = data["name"]
-country = data["sys"]["country"]
+    if response.status_code != 200:
+        print("Ошибка:", data.get("message"))
+        exit()
 
-print(f"Город: {city_name}, {country}")
-print(f"Температура: {temperature} °C")
-print(f"Ощущается как: {feels_like} °C")
-print(f"Состояние: {weather_description}")
-print(f"Влажность: {humidity} %")
-print(f"Давление: {pressure} hPa")
-print(f"Скорость ветра: {wind_speed} м/с")
+    temperature = data["main"]["temp"]
+    feels_like = data["main"]["feels_like"]
+    humidity = data["main"]["humidity"]
+    pressure = data["main"]["pressure"]
+    weather_description = data["weather"][0]["description"]
+    wind_speed = data["wind"]["speed"]
+    city_name = data["name"]
+    country = data["sys"]["country"]
+
+    print(f"Город: {city_name}, {country}")
+    print(f"Температура: {temperature} °C")
+    print(f"Ощущается как: {feels_like} °C")
+    print(f"Состояние: {weather_description}")
+    print(f"Влажность: {humidity} %")
+    print(f"Давление: {pressure} hPa")
+    print(f"Скорость ветра: {wind_speed} м/с")
+except RequestException:
+    print("Ошибка: Проблема с подключением к интернету")
+except ValueError:
+    print("Ошибка: Неверный формат ответа от сервера")
+except KeyError as e:
+    print(f"Ошибка: Отсутствует поле {e} в ответе API")

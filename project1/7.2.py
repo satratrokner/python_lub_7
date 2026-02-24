@@ -1,33 +1,39 @@
 import requests
+import os
 
-API_KEY = "921566c517414b3b8b1b34ebbd123a33"
+API_KEY = os.environ.get('NEWSAPI_API_KEY')
 
-# ввод темы
-query = input("Введите тему новостей (например: technology, sport, business): ")
-
-# формируем URL
-url = f"https://newsapi.org/v2/everything?q={query}&language=ru&pageSize=5&apiKey={API_KEY}"
-
-# отправляем запрос
-response = requests.get(url)
-data = response.json()
-
-# проверка
-if data["status"] != "ok":
-    print("❌ Ошибка:", data)
+if not API_KEY:
+    print("Ошибка: API ключ не найден в переменных окружения!")
+    print("Установите переменную NEWSAPI_API_KEY")
     exit()
 
-articles = data["articles"]
+query = input("Введите тему новостей (например: technology, sport, business): ")
 
-# вывод
-print("\n===== Найденные новости =====\n")
+url = f"https://newsapi.org/v2/everything?q={query}&language=ru&pageSize=5&apiKey={API_KEY}"
 
-for i, article in enumerate(articles, start=1):
-    print(f"🔹 Новость {i}")
-    print(f"Источник: {article['source']['name']}")
-    print(f"Автор: {article['author']}")
-    print(f"Заголовок: {article['title']}")
-    print(f"Описание: {article['description']}")
-    print(f"Дата публикации: {article['publishedAt']}")
-    print(f"Ссылка: {article['url']}")
-    print("-" * 40)
+try:
+
+    response = requests.get(url)
+    data = response.json()
+
+    if data["status"] != "ok":
+        print("Ошибка:", data)
+        exit()
+
+    articles = data["articles"]
+
+    for i, article in enumerate(articles, start=1):
+        print(f"Новость {i}")
+        print(f"Источник: {article['source']['name']}")
+        print(f"Автор: {article['author']}")
+        print(f"Заголовок: {article['title']}")
+        print(f"Описание: {article['description']}")
+        print(f"Дата публикации: {article['publishedAt']}")
+        print(f"Ссылка: {article['url']}")
+except RequestException:
+    print("Ошибка: Проблема с подключением к интернету")
+except ValueError:
+    print("Ошибка: Неверный формат ответа от сервера")
+except KeyError as e:
+    print(f"Ошибка: Отсутствует поле {e} в ответе API")
